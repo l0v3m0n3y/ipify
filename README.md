@@ -7,7 +7,7 @@ import Foundation
 let client = Ipify()
 
 do {
-    let ipInfo = try await client.my_ipv4()
+    let ipInfo = try await client.myIpv4()
     print(ipInfo)
 } catch {
     print("Error: \(error)")
