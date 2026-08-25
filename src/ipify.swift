@@ -35,36 +35,34 @@ public class Ipify {
 
     }
     
-    public func my_ipv4() async throws -> Any {
-        guard let url = URL(string: "https://api.\(api)/?format=json") else {
+    private func fetchJSON(from urlString: String,method: HTTPMethod = .get,body: Data? = nil,queryParameters: [String: String]? = nil) async throws -> Any {
+        var urlComponents = URLComponents(string: urlString)
+        if let queryParameters = queryParameters {
+            urlComponents?.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+        }
+        guard let url = urlComponents?.url else {
             throw NSError(domain: "Invalid URL", code: -1)
         }
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = method.rawValue
         request.allHTTPHeaderFields = headers
+        if let body = body {
+            request.httpBody = body
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         let (data, _) = try await URLSession.shared.data(for: request)
         return try JSONSerialization.jsonObject(with: data)
     }
     
-    public func my_ipv6() async throws -> Any {
-        guard let url = URL(string: "https://api6.\(api)/?format=json") else {
-            throw NSError(domain: "Invalid URL", code: -1)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.allHTTPHeaderFields = headers
-        let (data, _) = try await URLSession.shared.data(for: request)
-        return try JSONSerialization.jsonObject(with: data)
+    public func myIpv4() async throws -> Any {
+       return try await fetchJSON(from: "https://api.\(api)/?format=json")
     }
     
-    public func my_ip() async throws -> Any {
-        guard let url = URL(string: "https://api64.\(api)/?format=json") else {
-            throw NSError(domain: "Invalid URL", code: -1)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.allHTTPHeaderFields = headers
-        let (data, _) = try await URLSession.shared.data(for: request)
-        return try JSONSerialization.jsonObject(with: data)
+    public func myIpv6() async throws -> Any {
+        return try await fetchJSON(from: "https://api6.\(api)/?format=json")
+    }
+    
+    public func myIp() async throws -> Any {
+        return try await fetchJSON(from: "https://api64.\(api)/?format=json")
     }
 }
